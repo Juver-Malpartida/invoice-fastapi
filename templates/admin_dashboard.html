@@ -330,7 +330,7 @@
             position: fixed;
             top: 20px;
             right: 20px;
-            background-color: #2ecc71;
+            background-color: #e74c3c;
             color: white;
             padding: 10px 15px;
             border-radius: 5px;
@@ -347,7 +347,7 @@
 
 <body>
     <div class="auto-refresh" id="autoRefresh">
-        🔄 Auto-refresh: ON
+        ⏸️ Auto-refresh: OFF
     </div>
 
     <div class="container">
@@ -387,7 +387,7 @@
             </select>
             <button onclick="refreshData()">🔄 Actualizar</button>
             <button onclick="exportData()">📥 Exportar CSV</button>
-            <button onclick="toggleAutoRefresh()">⏸️ Pausar Auto-refresh</button>
+            <button onclick="toggleAutoRefresh()">▶️ Iniciar Auto-refresh</button>
         </div>
 
         <div id="loading" class="loading">
@@ -425,7 +425,7 @@
 
     <script>
         let autoRefreshInterval;
-        let autoRefreshEnabled = true;
+        let autoRefreshEnabled = false;
 
         function formatDate(dateString) {
             if (!dateString) return '-';
@@ -574,7 +574,7 @@
         async function showTaskDetail(taskId) {
             const modal = document.getElementById('detailModal');
             const content = document.getElementById('detailContent');
-            
+
             modal.style.display = 'block';
             content.innerHTML = '<div class="loading">Cargando detalles...</div>';
 
@@ -594,7 +594,7 @@
 
         function generateDetailHTML(data) {
             let html = '<div class="detail-section">';
-            
+
             // Información básica
             html += '<h3>Información General</h3>';
             html += `<div class="detail-row"><span class="detail-label">Task ID:</span><span class="detail-value">${data.task_id}</span></div>`;
@@ -630,7 +630,7 @@
         }
 
         // Cerrar modal al hacer clic fuera de él
-        window.onclick = function(event) {
+        window.onclick = function (event) {
             const modal = document.getElementById('detailModal');
             if (event.target === modal) {
                 closeModal();
@@ -642,7 +642,8 @@
 
         // Inicializar
         refreshData();
-        startAutoRefresh();
+        // Auto-refresh deshabilitado por defecto
+        // startAutoRefresh();
     </script>
 </body>
 

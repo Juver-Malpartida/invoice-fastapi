@@ -137,9 +137,95 @@
         }
 
         .task-id {
-            font-family: monospace;
-            font-size: 0.9em;
-            color: #7f8c8d;
+            font-family: 'Courier New', monospace;
+            font-size: 0.85em;
+            color: #2c3e50;
+            font-weight: 500;
+            letter-spacing: 0.5px;
+        }
+
+        .status-circle {
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            display: inline-block;
+            cursor: help;
+            margin: 0 auto;
+            position: relative;
+        }
+
+        .status-circle.pending {
+            background-color: #f39c12;
+        }
+
+        .status-circle.processing {
+            background-color: #3498db;
+            animation: pulse 2s infinite;
+        }
+
+        .status-circle.completed {
+            background-color: #27ae60;
+        }
+
+        .status-circle.failed {
+            background-color: #e74c3c;
+        }
+
+        @keyframes pulse {
+            0% {
+                transform: scale(1);
+                opacity: 1;
+            }
+
+            50% {
+                transform: scale(1.2);
+                opacity: 0.7;
+            }
+
+            100% {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        .tooltip {
+            position: relative;
+            display: inline-block;
+        }
+
+        .tooltip .tooltiptext {
+            visibility: hidden;
+            width: 120px;
+            background-color: #333;
+            color: #fff;
+            text-align: center;
+            border-radius: 6px;
+            padding: 5px 8px;
+            position: absolute;
+            z-index: 1;
+            bottom: 125%;
+            left: 50%;
+            margin-left: -60px;
+            opacity: 0;
+            transition: opacity 0.3s;
+            font-size: 12px;
+            font-weight: normal;
+        }
+
+        .tooltip .tooltiptext::after {
+            content: "";
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            margin-left: -5px;
+            border-width: 5px;
+            border-style: solid;
+            border-color: #333 transparent transparent transparent;
+        }
+
+        .tooltip:hover .tooltiptext {
+            visibility: visible;
+            opacity: 1;
         }
 
         .auto-refresh {
@@ -216,7 +302,7 @@
                     <th>Task ID</th>
                     <th>Archivo</th>
                     <th>Usuario</th>
-                    <th>Estado</th>
+                    <th style="text-align: center; width: 80px;">Estado</th>
                     <th>Fecha Inicio</th>
                     <th>Fecha Fin</th>
                     <th>Tokens</th>
@@ -239,7 +325,35 @@
         }
 
         function formatTaskId(taskId) {
-            return taskId.substring(0, 8) + '...';
+            // Formatear como GUID: 8-4-4-4-12 caracteres
+            if (taskId.length === 36) {
+                return taskId; // Ya está formateado
+            }
+            if (taskId.length === 32) {
+                // Formatear: xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
+                return taskId.substring(0, 8) + '-' +
+                    taskId.substring(8, 12) + '-' +
+                    taskId.substring(12, 16) + '-' +
+                    taskId.substring(16, 20) + '-' +
+                    taskId.substring(20);
+            }
+            return taskId; // Devolver como está si no es formato esperado
+        }
+
+        function createStatusCircle(status) {
+            const statusMap = {
+                'PENDING': { color: 'pending', text: 'Pendiente' },
+                'PROCESSING': { color: 'processing', text: 'Procesando' },
+                'COMPLETED': { color: 'completed', text: 'Completado' },
+                'FAILED': { color: 'failed', text: 'Fallido' }
+            };
+
+            const statusInfo = statusMap[status] || { color: 'pending', text: status };
+
+            return `<div class="tooltip">
+                        <span class="status-circle ${statusInfo.color}"></span>
+                        <span class="tooltiptext">${statusInfo.text}</span>
+                    </div>`;
         }
 
         async function loadStats() {
@@ -271,10 +385,10 @@
                 data.logs.forEach(log => {
                     const row = document.createElement('tr');
                     row.innerHTML = `
-                        <td class="task-id" title="${log.task_id}">${formatTaskId(log.task_id)}</td>
+                        <td class="task-id">${formatTaskId(log.task_id)}</td>
                         <td>${log.filename || '-'}</td>
                         <td>${log.user_identifier}</td>
-                        <td><span class="status ${log.status.toLowerCase()}">${log.status}</span></td>
+                        <td style="text-align: center;">${createStatusCircle(log.status)}</td>
                         <td>${formatDate(log.request_timestamp)}</td>
                         <td>${formatDate(log.completion_timestamp)}</td>
                         <td>${log.total_tokens || '-'}</td>
